@@ -6,6 +6,7 @@ export function PNRHome() {
     // set for input form
     const [pnr, setPnr] = useState('');
     // state for showing result
+    // eslint-disable-next-line no-unused-vars
     const [status, setStatus] = useState([])
     const [error, setError] = useState(false);
     const [errorMsg, setErrorMsg] = useState('')
