@@ -19,7 +19,7 @@ export function PNRHome() {
             setError(true);
         } else {
             try {
-                const res = await fetch(`http://localhost:8000/get_pnr_status/${pnr}`, {
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/get_pnr_status/${pnr}`, {
                     method: "GET",
                 });
                 const resJson = await res.json();
