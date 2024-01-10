@@ -1,23 +1,17 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 export function PNRHome() {
-    // set for input form
     const [pnr, setPnr] = useState('');
-    // state for showing result
-    // eslint-disable-next-line no-unused-vars
-    const [status, setStatus] = useState([])
+    const [status, setStatus] = useState([]);
     const [error, setError] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('')
-    const [submitted, setSubmitted] = useState(false)
+    const [errorMsg, setErrorMsg] = useState('');
+    const [submitted, setSubmitted] = useState(false);
 
-    // Handling the name change
     const handlePnr = (e) => {
         setPnr(e.target.value);
     };
 
-    // handling the submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(false);
@@ -25,62 +19,60 @@ export function PNRHome() {
             setError(true);
         } else {
             try {
-                let res = await fetch(`http://localhost:8000/get_pnr_status/${pnr}`, {
+                const res = await fetch(`http://localhost:8000/get_pnr_status/${pnr}`, {
                     method: "GET",
                 });
-                let resJson = await res.json();
+                const resJson = await res.json();
+                console.log('resJson - ', resJson)
                 if (res.status === 200 && resJson.length) {
-                    setPnr('')
+                    setPnr('');
                     setError(false);
-                    resJson.map(ele => status.push(ele))
+                    setStatus(resJson);
                 } else {
-                    setErrorMsg(resJson.res)
+                    setErrorMsg(resJson.res);
                     setError(true);
                 }
-                setSubmitted(true)
+                setSubmitted(true);
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
         }
     };
 
-    // Showing error message if error is true
-    const errorMessage = (errorMsg) => {
-        return (
-            <div
-                style={{
-                    display: error ? '' : 'none',
-                }}>
-                <h5>
-                    {errorMsg ? errorMsg : 'Please enter a PNR'}
-                </h5>
-            </div>
-        );
-    };
+    const errorMessage = () => (
+        <div style={{ display: error ? '' : 'none', color: 'red' }}>
+            <h5>{errorMsg || 'Please enter a PNR'}</h5>
+        </div>
+    );
 
     const handleResubmit = () => {
         window.location.reload(false);
-    }
+    };
 
     return (
-        <div class="main-block">
+        <div className="main-block">
             <h1>Enter PNR below:</h1>
             <form>
                 <hr />
                 <input type="text" value={pnr} onChange={handlePnr} required />
                 <hr />
-                <div class="btn-block">
+                <div className="btn-block">
                     <p>Click below button to find current status of the PNR.</p>
-                    {!submitted && <button type="submit" onClick={handleSubmit}>Submit</button>}
-                    {submitted && <button type="submit" onClick={handleResubmit}>Go again</button>}
+                    {!submitted ? (
+                        <button type="submit" onClick={handleSubmit}>
+                            Submit
+                        </button>
+                    ) : (
+                        <button type="submit" onClick={handleResubmit}>
+                            Go again
+                        </button>
+                    )}
                 </div>
             </form>
-            <div className="messages">
-                {errorMessage(errorMsg)}
-            </div>
-            {status.length ?
-                <div class="container">
-                    <table class="responsive-table">
+            <div className="messages">{errorMessage()}</div>
+            {status.length > 0 && (
+                <div className="container">
+                    <table className="responsive-table">
                         <thead>
                             <tr>
                                 <th scope="col">Sr No</th>
@@ -89,21 +81,17 @@ export function PNRHome() {
                             </tr>
                         </thead>
                         <tbody>
-                            {status.map(pass => 
-                            {
-                                return(
-                                    <tr>
+                            {status.map((pass, index) => (
+                                <tr key={index}>
                                     <th scope="row">{pass.sr_no}</th>
                                     <td>{pass.current_status}</td>
                                     <td>{pass.booking_status}</td>
                                 </tr>
-                                )
-                            })
-                            }
+                            ))}
                         </tbody>
                     </table>
                 </div>
-             : null}
+            )}
         </div>
-    )
+    );
 }
